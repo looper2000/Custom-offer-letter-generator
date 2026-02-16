@@ -5,6 +5,54 @@ import os
 
 TEMPLATE_FILE = "offer_template.docx"
 
+# Indian number system (Lakh, Crore)
+ONES = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"]
+TENS = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"]
+TEENS = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"]
+
+def _to_words_upto_99(n):
+    if n == 0:
+        return ""
+    if n < 10:
+        return ONES[n]
+    if n < 20:
+        return TEENS[n - 10]
+    t, o = divmod(n, 10)
+    return (TENS[t] + (" " + ONES[o] if o else "")).strip()
+
+def _to_words_upto_999(n):
+    if n == 0:
+        return ""
+    if n < 100:
+        return _to_words_upto_99(n)
+    h, r = divmod(n, 100)
+    return (ONES[h] + " Hundred" + (" " + _to_words_upto_99(r) if r else "")).strip()
+
+def number_to_words(num):
+    """Convert number to words (Indian style: Lakh, Crore). E.g. 500000 -> 'Five Lakh Only'."""
+    num = int(round(num))
+    if num == 0:
+        return "Zero Only"
+    if num < 0:
+        return "Minus " + number_to_words(-num)
+    words = []
+    # Crore
+    crore, num = divmod(num, 10000000)
+    if crore:
+        words.append(_to_words_upto_999(crore) + " Crore")
+    # Lakh
+    lakh, num = divmod(num, 100000)
+    if lakh:
+        words.append(_to_words_upto_999(lakh) + " Lakh")
+    # Thousand
+    thousand, num = divmod(num, 1000)
+    if thousand:
+        words.append(_to_words_upto_999(thousand) + " Thousand")
+    # Rest
+    if num:
+        words.append(_to_words_upto_999(num))
+    return " ".join(words) + " Only"
+
 def format_currency(num):
     return "{:,.0f}".format(num)
 
@@ -45,6 +93,7 @@ if st.button("Generate Offer Letter"):
         "{{job_title}}": job_title,
         "{{joining_deadline}}": joining_deadline,
         "{{total_ctc}}": format_currency(total_ctc),
+        "{{total_ctc_words}}": number_to_words(total_ctc),
         "{{fixed_ctc}}": format_currency(fixed_ctc),
         "{{performance_percent}}": str(performance_percent),
         "{{performance_amount}}": format_currency(performance_amount),
