@@ -75,9 +75,10 @@ name = st.text_input("Candidate Name")
 job_title = st.text_input("Job Title")
 joining_deadline_date = st.date_input("Joining Deadline")
 total_ctc = st.number_input("Total CTC", min_value=0)
+st.caption(f"In words: **{number_to_words(total_ctc)}**")
 performance_percent = st.number_input("Performance %", min_value=0.0)
-probation = st.text_input("Probation Period", value="6 months")
-notice = st.text_input("Notice Period", value="3 months")
+probation = st.text_input("Probation Period", value="6")
+notice = st.text_input("Notice Period", value="2")
 
 if st.button("Generate Offer Letter"):
 
@@ -86,9 +87,12 @@ if st.button("Generate Offer Letter"):
 
     today = datetime.today().strftime("%d %B %Y")
     joining_deadline = joining_deadline_date.strftime("%d %B %Y")
+    first_name = name.strip().split()[0] if name and name.strip() else name or ""
 
     replacements = {
         "{{date}}": today,
+        "{{first_name}}": first_name,
+        "{{full_name}}": name,
         "{{name}}": name,
         "{{job_title}}": job_title,
         "{{joining_deadline}}": joining_deadline,
